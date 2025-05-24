@@ -1,27 +1,36 @@
-import * as anchor from '@coral-xyz/anchor';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { Program } from '@coral-xyz/anchor';
-import { RidePayment } from '../../target/types/ride_payment';
-import idl from '../solana/idl/ride_payment.json';
-import fs from 'fs';
+import { AnchorProvider, Program, Idl } from '@coral-xyz/anchor';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { RidePayment } from '../lib/ride_payment';
+import escrow_wallet from '../keys/escrow_wallet.json';
+import idlFile from '../lib/ride_payment.json'
 
-const programId = new PublicKey("CHK9W5TLQ5roAbGwdY3eKDKpeCFFG7mfd6TTXXFb8ztS");
+const PROGRAM_ID = new PublicKey('CHK9W5TLQ5roAbGwdY3eKDKpeCFFG7mfd6TTXXFb8ztS');
+const idl = idlFile as Idl;
 
-const backendKey = JSON.parse(fs.readFileSync('./src/keys/escrow_wallet.json', 'utf8'));
-const backendAuthority = Keypair.fromSecretKey(Uint8Array.from(backendKey));
+const backendAuthority = Keypair.fromSecretKey(Uint8Array.from(escrow_wallet));
 
-const provider = new anchor.AnchorProvider(
-  new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
-  new anchor.Wallet(backendAuthority),
-  { preflightCommitment: "confirmed" }
-);
+const connection = new Connection('https://api.devnet.solana.com', {
+  commitment: 'confirmed',
+});
 
-anchor.setProvider(provider);
+const wallet = {
+  publicKey: backendAuthority.publicKey,
+  signTransaction: async (tx: any) => {
+    tx.sign(backendAuthority);
+    return tx;
+  },
+  signAllTransactions: async (txs: any[]) => {
+    return txs.map(tx => {
+      tx.sign(backendAuthority);
+      return tx;
+    });
+  },
+};
 
-const program = new anchor.Program(
-  idl as anchor.Idl,
-  programId,
-  provider
-) as Program<RidePayment>;
+const provider = new AnchorProvider(connection, wallet, {
+  preflightCommitment: 'confirmed',
+});
 
-export { program, backendAuthority };
+const program = new Program<RidePayment>(idl as RidePayment, PROGRAM_ID, provider);
+
+export { program, backendAuthority, PROGRAM_ID };
