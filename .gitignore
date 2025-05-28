@@ -1,2 +1,3 @@
 node_modules
-./src/keys/escrow_wallet.json
+src/keys/escrow_wallet.json
+src/keys/admin-service-key.json
