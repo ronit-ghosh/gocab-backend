@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { program, backendAuthority } from '../utils/anchorClient';
 import { checkBalance, checkConnection } from '../utils/walletChecks';
+import db from '@/utils/firestoreClient';
 
 const driverRouter = Router();
 
@@ -9,6 +10,17 @@ driverRouter.get('/', async (req, res) => {
   const balance = await checkBalance();
   checkConnection()
   res.json({ message: 'Driver route root', balance });
+});
+
+driverRouter.get('/getAll', async (req, res) => {
+  try {
+    const snapshot = await db.collection('drivers').get();
+    const drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ message: 'data retrieved successfully', drivers });
+  } catch (error) {
+    console.error('Error getting all drivers:', error);
+    res.status(500).json({ error: error|| 'Internal server error' });
+  }
 });
 
 driverRouter.post('/ride/complete', async (req, res): Promise<any> => {
@@ -36,14 +48,14 @@ driverRouter.post('/ride/complete', async (req, res): Promise<any> => {
     await program.methods
       .completeRide()
       .accounts({
-        rideAccount:   rideAccountPda,             
-        vault:         vaultPda,                  
-        config:        configPda,                 
-        passenger:     new PublicKey(passenger),  
-        driver:        new PublicKey(driver),     
-        companyWallet: new PublicKey(companyWallet), 
-        authority:     backendAuthority.publicKey, 
-        systemProgram: SystemProgram.programId    
+        rideAccount: rideAccountPda,
+        vault: vaultPda,
+        config: configPda,
+        passenger: new PublicKey(passenger),
+        driver: new PublicKey(driver),
+        companyWallet: new PublicKey(companyWallet),
+        authority: backendAuthority.publicKey,
+        systemProgram: SystemProgram.programId
       })
       .signers([backendAuthority])
       .rpc();

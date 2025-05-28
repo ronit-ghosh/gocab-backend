@@ -21,9 +21,15 @@ The backend service for **GoCab** – a decentralized ride-sharing platform powe
 ```bash
 git clone https://github.com/shricastic/gocab-backend.git
 cd gocab-backend
+```
 
 ### 2. Start server
 
 ```bash
 npm run dev
+```
+
+### 2. Prerequisites 
+    - escrow_wallet.json private key for your wallet
+    - admin-service-key.json for firebase firestore db
 
