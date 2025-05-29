@@ -1,13 +1,22 @@
 const admin = require("firebase-admin");
 
-const serviceAccount = require("../keys/admin-service-key.json");
+const driverServiceAccount = require("../keys/driver-app-service-key.json");
+const riderServiceAccount = require("../keys/rider-app-service-key.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://stickersmash-b6cd8-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
+const driverApp = admin.initializeApp(
+  {
+    credential: admin.credential.cert(driverServiceAccount),
+    databaseURL: "https://stickersmash-b6cd8-default-rtdb.asia-southeast1.firebasedatabase.app"
+  },
+  "driverApp" 
+);
 
-const db = admin.firestore();
+const riderApp = admin.initializeApp(
+  {
+    credential: admin.credential.cert(riderServiceAccount)
+  },
+  "riderApp" 
+);
 
-
-export default db;
+export const driverDb = driverApp.firestore();
+export const riderDb = riderApp.firestore();

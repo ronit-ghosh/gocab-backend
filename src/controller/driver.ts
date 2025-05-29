@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { program, backendAuthority } from '../utils/anchorClient';
 import { checkBalance, checkConnection } from '../utils/walletChecks';
-import db from '@/utils/firestoreClient';
+import { driverDb } from '@/utils/firestoreClient';
 
 const driverRouter = Router();
 
@@ -14,7 +14,7 @@ driverRouter.get('/', async (req, res) => {
 
 driverRouter.get('/getAll', async (req, res) => {
   try {
-    const snapshot = await db.collection('drivers').get();
+    const snapshot = await driverDb.collection('drivers').get();
     const drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json({ message: 'data retrieved successfully', drivers });
   } catch (error) {

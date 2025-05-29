@@ -1,3 +1,4 @@
 node_modules
 src/keys/escrow_wallet.json
-src/keys/admin-service-key.json
+src/keys/driver-app-service-key.json
+src/keys/rider-app-service-key.json
